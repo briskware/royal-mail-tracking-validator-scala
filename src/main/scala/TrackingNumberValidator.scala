@@ -4,7 +4,6 @@ import cats.syntax.all._
 
 import scala.annotation.tailrec
 
-
 /**
   * UK Royal Mail Tracking Number Validator
   *

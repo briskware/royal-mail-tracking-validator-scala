@@ -1,6 +1,5 @@
 import org.scalatest.WordSpec
 
-
 class TrackingNumberValidatorSpec extends WordSpec {
 
   "The TrackingNumber validator" must {
