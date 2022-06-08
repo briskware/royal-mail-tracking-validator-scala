@@ -4,13 +4,12 @@ import cats.syntax.all._
 
 import scala.annotation.tailrec
 
+
 /**
   * UK Royal Mail Tracking Number Validator
   *
- *
   * For reference see: https://www.royalmail.com/sites/default/files/Royal_Mail_Tracked_Standard_COSS_V2_1.pdf
   */
-
 case class TrackingNumber(prefix: String, digits: Array[Int], checkDigit: Int, suffix: String = "GB") {
   override def toString =
     s"$prefix${digits.mkString}$checkDigit$suffix"
