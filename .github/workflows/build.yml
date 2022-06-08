@@ -9,10 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      JAVA_VERSION: 17
-      SCALA_VERSION: 2.13.8
-      SBT_VERSION: 1.6.2
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
