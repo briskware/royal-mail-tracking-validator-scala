@@ -13,6 +13,10 @@ jobs:
       - name: SBT action test
         id: sbt
         uses: lokkju/github-action-sbt@master
+        env:
+          JAVA_VERSION: 17
+          SCALA_VERSION: 2.13.8
+          SBT_VERSION: 1.6.2
         with:
           commands: test
           sbt_project_directory: ./test
