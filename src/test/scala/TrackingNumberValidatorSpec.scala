@@ -26,6 +26,8 @@ class TrackingNumberValidatorSpec extends WordSpec {
       ("NY12345678901GB", false),
       ("gibberish", false),
       ("NY819217292GB", true),
+      ("pY819217292GB", false),
+      ("NY819217292GBs", false),
       ("NY819217315GB", true),
       ("NYC19217315GB", false),
       ("NY8192173153B", false),
