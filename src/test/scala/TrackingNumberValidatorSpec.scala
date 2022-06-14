@@ -32,10 +32,10 @@ class TrackingNumberValidatorSpec extends WordSpec {
       ("", false)
     ) foreach {
       case (theNumber, valid) =>
-        s"'$theNumber' is ${if (valid) "valid" else "invalid"}" in {
+        s"'$theNumber' is ${Option.when(!valid)("in").mkString}valid" in {
           val _ = TrackingNumber(theNumber) match {
             case Right(_)  => assert(valid, "Should be valid")
-            case Left(err) => assert(!valid, s"Should be valid but is not: ${err.message}")
+            case Left(err) => assert(!valid, s"Should be valid but is not: ${err.reason}")
             case _         => System.err.println(s"$theNumber Test FAILURE")
           }
         }

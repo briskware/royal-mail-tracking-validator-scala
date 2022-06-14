@@ -14,13 +14,10 @@ case class TrackingNumber(prefix: String, digits: Array[Int], checkDigit: Int, s
     s"$prefix${digits.mkString}$checkDigit$suffix"
 }
 
-case class TrackingNumberError(message: String)
+case class TrackingNumberError(reason: String)
 
 object TrackingNumber {
   private val TNP: Regex = "([A-Z]{2})([0-9]{8})([0-9])([A-Z]{2})".r
-
-  private def toDigits(string: String): Either[TrackingNumberError, Array[Int]] =
-    Try(string.map(_.toInt).toArray).toEither.left.map(e => TrackingNumberError(e.getMessage))
 
   @tailrec
   private def checkDigit(digits: Array[Int], weighting: Array[Int] = Array(8, 6, 4, 2, 3, 5, 9, 7), sum: Int = 0): Int =
@@ -40,12 +37,11 @@ object TrackingNumber {
   def apply(string: String): Either[TrackingNumberError, TrackingNumber] =
     string match {
       case TNP(prefix, digits, checkDigit, suffix) =>
-        val r = for {
-          ds <- toDigits(digits)
+        for {
+          ds <- Try(digits.map(_.toInt).toArray).toEither.left.map(e => TrackingNumberError(e.getMessage))
           cd <- Try(checkDigit.toInt).toEither.left.map(e => TrackingNumberError(e.getMessage))
           _  <- validateCheckDigit(ds, cd).toEither.left.map(e => TrackingNumberError(e.getMessage))
-        } yield Right(TrackingNumber(prefix, ds, cd, suffix))
-        r.flatten
+        } yield TrackingNumber(prefix, ds, cd, suffix)
       case _ =>
         Left(TrackingNumberError(s"invalid tracking number syntax: $string"))
     }
