@@ -17,4 +17,4 @@ jobs:
         id: sbt
         uses: briskware/github-action-sbt@master
         with:
-          commands: test; scalafmtCheckAll; coverage; coverageOff; coverageReport
+          commands: test; coverage; test; coverageOff; coverageReport; scalafmtCheckAll
