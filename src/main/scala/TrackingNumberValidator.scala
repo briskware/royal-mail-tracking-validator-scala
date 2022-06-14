@@ -1,13 +1,12 @@
-import scala.util.Try
-import scala.util.matching.Regex
-import cats.syntax.all._
-
 import scala.annotation.tailrec
+import scala.util.matching.Regex
+
+import cats.syntax.all._
 
 /**
   * UK Royal Mail Tracking Number Validator
   *
-  * For reference see: https://www.royalmail.com/sites/default/files/Royal_Mail_Tracked_Standard_COSS_V2_1.pdf
+  * For reference see: {{https://www.royalmail.com/sites/default/files/Royal_Mail_Tracked_Standard_COSS_V2_1.pdf}}
   */
 case class TrackingNumber(prefix: String, digits: Array[Int], checkDigit: Int, suffix: String = "GB") {
   override def toString =
@@ -17,7 +16,7 @@ case class TrackingNumber(prefix: String, digits: Array[Int], checkDigit: Int, s
 case class TrackingNumberError(reason: String)
 
 object TrackingNumber {
-  private val TNP: Regex = "([A-Z]{2})([0-9]{8})([0-9])([A-Z]{2})".r
+  private val TNP: Regex = "^([A-Z]{2})([0-9]*)([0-9])([A-Z]{2})$".r
 
   @tailrec
   private def checkDigit(digits: Array[Int], weighting: Array[Int] = Array(8, 6, 4, 2, 3, 5, 9, 7), sum: Int = 0): Int =
@@ -28,22 +27,25 @@ object TrackingNumber {
     } else
       checkDigit(digits.tail, weighting.tail, sum + digits.head * weighting.head)
 
-  private def validateCheckDigit(digits: Array[Int], digit: Int): Try[Unit] =
-    Try {
-      assert(digits.length === 8, "invalid item identifier")
-      assert(checkDigit(digits) === digit, "incorrect check digit")
-    }
+  private def validateCheckDigit(digits: Array[Int], digit: Int): Either[TrackingNumberError, Unit] = {
+    for {
+      _ <- Either.cond(digits.length == 8,     Either.unit, TrackingNumberError(s"invalid item identifier: '${digits.map(_.toChar).mkString}''"))
+      expectedDigit = checkDigit(digits)
+      _ <- Either.cond(expectedDigit == digit, Either.unit, TrackingNumberError(s"incorrect check digit '$digit', expected '$expectedDigit'"))
+    } yield ()
+  }
 
   def apply(string: String): Either[TrackingNumberError, TrackingNumber] =
     string match {
       case TNP(prefix, digits, checkDigit, suffix) =>
         for {
-          ds <- Try(digits.map(_.toInt).toArray).toEither.left.map(e => TrackingNumberError(e.getMessage))
-          cd <- Try(checkDigit.toInt).toEither.left.map(e => TrackingNumberError(e.getMessage))
-          _  <- validateCheckDigit(ds, cd).toEither.left.map(e => TrackingNumberError(e.getMessage))
+          // String.toInt throws NPE so handle that
+          ds <- Either.catchOnly[NumberFormatException](digits.map(_.toInt).toArray).leftMap(e => TrackingNumberError(e.getMessage))
+          cd <- Either.catchOnly[NumberFormatException](checkDigit.toInt).leftMap(e => TrackingNumberError(e.getMessage))
+          _  <- validateCheckDigit(ds, cd)
         } yield TrackingNumber(prefix, ds, cd, suffix)
       case _ =>
-        Left(TrackingNumberError(s"invalid tracking number syntax: $string"))
+        Either.left(TrackingNumberError(s"invalid tracking number syntax: $string"))
     }
 
   def apply(prefix: String, digits: Array[Int], suffix: String): Either[TrackingNumberError, TrackingNumber] =

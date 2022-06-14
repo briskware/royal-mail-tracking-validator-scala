@@ -23,6 +23,7 @@ class TrackingNumberValidatorSpec extends WordSpec {
       ("NY819217301GB", true),
       ("NY819217302GB", false),
       ("NY81921S7302GB", false),
+      ("NY12345678901GB", false),
       ("gibberish", false),
       ("NY819217292GB", true),
       ("NY819217315GB", true),
@@ -33,7 +34,7 @@ class TrackingNumberValidatorSpec extends WordSpec {
     ) foreach {
       case (theNumber, valid) =>
         s"'$theNumber' is ${Option.when(!valid)("in").mkString}valid" in {
-          val _ = TrackingNumber(theNumber) match {
+          TrackingNumber(theNumber) match {
             case Right(_)  => assert(valid, "Should be valid")
             case Left(err) => assert(!valid, s"Should be valid but is not: ${err.reason}")
             case _         => System.err.println(s"$theNumber Test FAILURE")
