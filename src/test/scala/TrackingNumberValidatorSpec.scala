@@ -39,7 +39,7 @@ class TrackingNumberValidatorSpec extends WordSpec {
           TrackingNumber(theNumber) match {
             case Right(_)  => assert(valid, "Should be valid")
             case Left(err) => assert(!valid, s"Should be valid but is not: ${err.reason}")
-            case _         => System.err.println(s"$theNumber Test FAILURE")
+            case _         => assert(false, s"expectation mismatch")
           }
         }
     }
