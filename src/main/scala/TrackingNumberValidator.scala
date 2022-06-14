@@ -27,13 +27,12 @@ object TrackingNumber {
     } else
       checkDigit(digits.tail, weighting.tail, sum + digits.head * weighting.head)
 
-  private def validateCheckDigit(digits: Array[Int], digit: Int): Either[TrackingNumberError, Unit] = {
+  private def validateCheckDigit(digits: Array[Int], digit: Int): Either[TrackingNumberError, Unit] =
     for {
-      _ <- Either.cond(digits.length == 8,     Either.unit, TrackingNumberError(s"invalid item identifier: '${digits.map(_.toChar).mkString}''"))
+      _ <- Either.cond(digits.length == 8, Either.unit, TrackingNumberError(s"invalid item identifier: '${digits.map(_.toChar).mkString}''"))
       expectedDigit = checkDigit(digits)
       _ <- Either.cond(expectedDigit == digit, Either.unit, TrackingNumberError(s"incorrect check digit '$digit', expected '$expectedDigit'"))
     } yield ()
-  }
 
   def apply(string: String): Either[TrackingNumberError, TrackingNumber] =
     string match {
