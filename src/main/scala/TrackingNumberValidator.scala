@@ -19,10 +19,14 @@ object TrackingNumber {
   private val TNP: Regex = "^([A-Z]{2})([0-9]*)([0-9])([A-Z]{2})$".r
 
   @tailrec
-  private def checkDigit(digits: Array[Int], weighting: Array[Int] = Array(8, 6, 4, 2, 3, 5, 9, 7), sum: Int = 0): Int =
+  def checkDigit(digits: Array[Int], weighting: Array[Int] = Array(8, 6, 4, 2, 3, 5, 9, 7), sum: Int = 0): Int =
     if (digits.isEmpty) {
-      val result = 11 - sum % 11
-      assert(result < 10)
+      val result = 11 - sum % 11 match {
+        case 10 => 0
+        case 11 => 5
+        case r  => r
+      }
+      assert(result < 10, s"check digit is $result, which is more than one digits") // this should never happen
       result
     } else
       checkDigit(digits.tail, weighting.tail, sum + digits.head * weighting.head)

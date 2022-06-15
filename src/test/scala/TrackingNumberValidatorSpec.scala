@@ -1,5 +1,7 @@
 import org.scalatest.WordSpec
 
+import scala.util.{Failure, Try}
+
 class TrackingNumberValidatorSpec extends WordSpec {
 
   "The TrackingNumber validator" must {
@@ -31,6 +33,8 @@ class TrackingNumberValidatorSpec extends WordSpec {
       ("NY819217315GB", true),
       ("NYC19217315GB", false),
       ("NY8192173153B", false),
+      ("NY000000080GB", true), // edge case when checkDigit of 10 is replaced by 0
+      ("NY000000155GB", true), // edge case when checkDigit of 11 is replaced by 5
       (null, false),
       ("", false)
     ) foreach {
@@ -42,6 +46,17 @@ class TrackingNumberValidatorSpec extends WordSpec {
             case _         => assert(false, s"expectation mismatch")
           }
         }
+    }
+  }
+
+  "The TrackingNumber.checkDigit validator" must {
+    "work for all possible digits" in {
+      1.toLong to 99999999 take 20 map { idx => f"$idx%08d".toArray.map(_.toInt) } foreach { digits =>
+        val check = Try(TrackingNumber.checkDigit(digits)) match {
+          case Failure(err) => assert(false, s"digits: ${digits.map(_.toChar).mkString} failed with ${err.getMessage}")
+          case _            => ()
+        }
+      }
     }
   }
 
